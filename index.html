@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title>Telegram Web App QR Scanner</title>
-		<style>
+		<!-- <style>
 			video {
 				width: 100%;
 				max-width: 400px;
@@ -14,21 +14,21 @@
 				font-size: 1.2em;
 				color: green;
 			}
-		</style>
+		</style> -->
 	</head>
 	<body>
-		<h2>QR-сканер для Telegram Web App</h2>
+		<!-- <h2>QR-сканер для Telegram Web App</h2> -->
 		<video id="video"></video>
-		<div id="result">Очікуємо QR...</div>
+		<!-- <div id="result">Очікуємо QR...</div> -->
 
 		<script type="module">
 			import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
 
 			const videoElem = document.getElementById("video");
-			const resultElem = document.getElementById("result");
+			// const resultElem = document.getElementById("result");
 
 			const scanner = new QrScanner(videoElem, (result) => {
-				resultElem.textContent = "Розпізнано: " + result;
+				// resultElem.textContent = "Розпізнано: " + result;
 
 				// Відправка даних у бот через Telegram WebApp API
 				if (window.Telegram.WebApp && window.Telegram.WebApp.sendData) {
@@ -38,9 +38,9 @@
 				}
 			});
 
-			scanner.start().catch((e) => {
-				resultElem.textContent = "Помилка доступу до камери: " + e;
-			});
+			// scanner.start().catch((e) => {
+			// 	resultElem.textContent = "Помилка доступу до камери: " + e;
+			// });
 		</script>
 	</body>
 </html>
