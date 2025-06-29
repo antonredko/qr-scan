@@ -1,47 +1,75 @@
 <!DOCTYPE html>
 <html lang="uk">
-	<head>
-		<meta charset="UTF-8" />
-		<title>Telegram Web App QR Scanner</title>
-		<style>
-			video {
-				width: 100%;
-                		height: 100%;
-				/* max-width: 400px;
-				border: 1px solid #ccc; */
-			}
-			#result {
-				margin-top: 10px;
-				font-size: 1.2em;
-				color: green;
-			}
-		</style>
-	</head>
-	<body>
-		<!-- <h2>QR-сканер для Telegram Web App</h2> -->
-		<video id="video"></video>
-		<div id="result">Очікуємо QR...</div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Сканер</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      height: 100%;
+      overflow: hidden;
+    }
 
-		<script type="module">
-			import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
+    #video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
 
-			const videoElem = document.getElementById("video");
-			const resultElem = document.getElementById("result");
+    #message {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-size: 1.2em;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
 
-			const scanner = new QrScanner(videoElem, (result) => {
-				resultElem.textContent = "Розпізнано: " + result;
+  <video id="video" autoplay muted playsinline></video>
+  <div id="message">Сканування QR-коду...</div>
 
-				// Відправка даних у бот через Telegram WebApp API
-				if (window.Telegram.WebApp && window.Telegram.WebApp.sendData) {
-					window.Telegram.WebApp.sendData(result);
-				} else {
-					console.log("Telegram WebApp API недоступний");
-				}
-			});
+  <script type="module">
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
 
-			scanner.start().catch((e) => {
-				resultElem.textContent = "Помилка доступу до камери: " + e;
-			});
-		</script>
-	</body>
+    const video = document.getElementById('video');
+    const message = document.getElementById('message');
+
+    const scanner = new QrScanner(video, result => {
+      message.textContent = 'Знайдено: ' + result;
+
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.sendData(result);
+        window.Telegram.WebApp.close(); // або залиш відкрите, якщо потрібно
+      } else {
+        alert('Відкрий через Telegram Web App');
+      }
+
+      scanner.stop(); // Зупиняємо сканер
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand(); // fullscreen
+      }
+
+      scanner.start().catch(e => {
+        message.textContent = 'Помилка камери: ' + e;
+      });
+    });
+  </script>
+
+</body>
 </html>
