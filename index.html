@@ -3,18 +3,11 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title>Telegram Web App QR Scanner</title>
-		<!-- <style>
+		<style>
 			video {
 				width: 100%;
-				max-width: 400px;
-				border: 1px solid #ccc;
 			}
-			#result {
-				margin-top: 10px;
-				font-size: 1.2em;
-				color: green;
-			}
-		</style> -->
+		</style>
 	</head>
 	<body>
 		<!-- <h2>QR-сканер для Telegram Web App</h2> -->
@@ -38,9 +31,7 @@
 				}
 			});
 
-			// scanner.start().catch((e) => {
-			// 	resultElem.textContent = "Помилка доступу до камери: " + e;
-			// });
+			scanner.start();
 		</script>
 	</body>
 </html>
