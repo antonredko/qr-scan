@@ -34,7 +34,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.6); /* Semi-transparent dark overlay */
+      /* Background is now handled by #scan-area's box-shadow to create a transparent hole */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -46,12 +46,13 @@
       max-width: 300px; /* Max width for larger screens */
       height: 60vw; /* Keep it square */
       max-height: 300px;
-      border: 3px solid #00ff00; /* Green border for the scan area */
-      border-radius: 15px; /* Rounded corners for the scan area */
+      border: none; /* Removed the main border as requested */
+      border-radius: 15px; /* Keep rounded corners for the "hole" effect */
       box-sizing: border-box; /* Include padding and border in the element's total width and height */
       position: relative; /* For the focus lines */
-      overflow: hidden; /* Hide anything outside the border */
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5); /* Glowing effect */
+      overflow: hidden; /* Hide anything outside the border-radius for the hole */
+      /* This large inset box-shadow creates the semi-transparent dark overlay around the transparent scan area */
+      box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6); /* Creates the dark mask with a central transparent hole */
     }
 
     /* Small corner markers for the scan area */
@@ -116,11 +117,12 @@
       video, // The video element to use for scanning
       result => {
         // Callback function when a QR code is found
-        message.textContent = 'Знайдено: ' + result; // Update message with scanned data
+        // Access the actual data string from result.data
+        message.textContent = 'Знайдено: ' + result.data; // Updated to use result.data
 
         // Check if running inside Telegram Web App
         if (window.Telegram?.WebApp) {
-          window.Telegram.WebApp.sendData(result); // Send data to Telegram bot
+          window.Telegram.WebApp.sendData(result.data); // Updated to send result.data
           window.Telegram.WebApp.close(); // Close the Web App after scanning
         } else {
           // Fallback for non-Telegram Web App environment (use a custom modal instead of alert)
