@@ -11,7 +11,12 @@
       padding: 0;
       background: black;
       height: 100%;
+      width: 100%; /* Ensure body takes full width */
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     #video {
@@ -20,54 +25,175 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      object-fit: cover;
+      object-fit: cover; /* Cover the entire screen */
     }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6); /* Semi-transparent dark overlay */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10; /* Ensure overlay is above video */
+    }
+
+    #scan-area {
+      width: 60vw; /* Responsive width */
+      max-width: 300px; /* Max width for larger screens */
+      height: 60vw; /* Keep it square */
+      max-height: 300px;
+      border: 3px solid #00ff00; /* Green border for the scan area */
+      border-radius: 15px; /* Rounded corners for the scan area */
+      box-sizing: border-box; /* Include padding and border in the element's total width and height */
+      position: relative; /* For the focus lines */
+      overflow: hidden; /* Hide anything outside the border */
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5); /* Glowing effect */
+    }
+
+    /* Small corner markers for the scan area */
+    #scan-area::before,
+    #scan-area::after,
+    #scan-area > div::before,
+    #scan-area > div::after {
+      content: '';
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-color: #00ff00;
+      border-style: solid;
+    }
+
+    #scan-area::before { top: -3px; left: -3px; border-width: 3px 0 0 3px; border-radius: 15px 0 0 0; }
+    #scan-area::after { top: -3px; right: -3px; border-width: 3px 3px 0 0; border-radius: 0 15px 0 0; }
+    #scan-area > div::before { bottom: -3px; left: -3px; border-width: 0 0 3px 3px; border-radius: 0 0 0 15px; }
+    #scan-area > div::after { bottom: -3px; right: -3px; border-width: 0 3px 3px 0; border-radius: 0 0 15px 0; }
+
 
     #message {
       position: absolute;
       bottom: 0;
       width: 100%;
       text-align: center;
-      padding: 10px;
-      background: rgba(0,0,0,0.5);
+      padding: 15px;
+      background: rgba(0,0,0,0.7); /* Slightly darker background for message */
       color: white;
-      font-size: 1.2em;
-      font-family: sans-serif;
+      font-size: 1.3em; /* Slightly larger font */
+      font-family: 'Inter', sans-serif; /* Use Inter font */
+      z-index: 20; /* Ensure message is above everything */
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
     }
   </style>
+  <!-- Load Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <video id="video"></video>
+  <div id="overlay">
+    <div id="scan-area">
+      <!-- These divs create the corner markers for the scan area -->
+      <div></div>
+      <div></div>
+    </div>
+  </div>
   <div id="message">Сканування QR-коду...</div>
 
   <script type="module">
+    // Import the QR Scanner library
     import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
 
+    // Get references to HTML elements
     const video = document.getElementById('video');
     const message = document.getElementById('message');
 
-    const scanner = new QrScanner(video, result => {
-      message.textContent = 'Знайдено: ' + result;
+    // Initialize the QR scanner
+    const scanner = new QrScanner(
+      video, // The video element to use for scanning
+      result => {
+        // Callback function when a QR code is found
+        message.textContent = 'Знайдено: ' + result; // Update message with scanned data
 
-      if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.sendData(result);
-        window.Telegram.WebApp.close(); // або залиш відкрите, якщо потрібно
-      } else {
-        alert('Відкрий через Telegram Web App');
+        // Check if running inside Telegram Web App
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.sendData(result); // Send data to Telegram bot
+          window.Telegram.WebApp.close(); // Close the Web App after scanning
+        } else {
+          // Fallback for non-Telegram Web App environment (use a custom modal instead of alert)
+          showCustomModal('Відкрий через Telegram Web App');
+        }
+
+        scanner.stop(); // Stop the scanner once a QR code is found
+      },
+      {
+        /* Options for QrScanner */
+        // Highlight the scanned code visually
+        highlightScanRegion: true,
+        highlightCodeOutline: true,
+        // Set the desired scan region to match the visual #scan-area
+        // The region is relative to the video feed.
+        // We'll calculate it dynamically to match the centered square.
+        // For simplicity, let the library handle the full frame and rely on the visual guide.
+        // If a more precise scan region is needed, advanced calculation based on video dimensions and #scan-area position would be required.
+        // For now, the visual guide is just a suggestion to the user.
       }
+    );
 
-      scanner.stop(); // Зупиняємо сканер
-    });
+    // Custom modal function to replace alert() and confirm()
+    function showCustomModal(msg) {
+      let modalOverlay = document.createElement('div');
+      modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      `;
 
+      let modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        color: black;
+        font-family: 'Inter', sans-serif;
+        max-width: 80%;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      `;
+      modalContent.innerHTML = `<p>${msg}</p><button id="modal-ok" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;">OK</button>`;
+
+      modalOverlay.appendChild(modalContent);
+      document.body.appendChild(modalOverlay);
+
+      document.getElementById('modal-ok').onclick = () => {
+        document.body.removeChild(modalOverlay);
+      };
+    }
+
+    // Event listener for when the DOM is fully loaded
     document.addEventListener('DOMContentLoaded', () => {
+      // Check if running inside Telegram Web App
       if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand(); // fullscreen
+        window.Telegram.WebApp.ready(); // Signal that the app is ready
+        window.Telegram.WebApp.expand(); // Expand the Web App to full screen
       }
 
+      // Start the scanner
       scanner.start().catch(e => {
+        // Handle camera access errors
         message.textContent = 'Помилка камери: ' + e;
+        // Also show a custom modal for the error
+        showCustomModal('Помилка доступу до камери: ' + (e.message || e));
       });
     });
   </script>
