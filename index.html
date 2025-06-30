@@ -124,13 +124,13 @@
         // Check if running inside Telegram Web App
         if (window.Telegram?.WebApp) {
           window.Telegram.WebApp.sendData(result.data); // Updated to send result.data
-          // window.Telegram.WebApp.close(); // Close the Web App after scanning
+          window.Telegram.WebApp.close(); // Close the Web App after scanning
         } else {
           // Fallback for non-Telegram Web App environment (use a custom modal instead of alert)
           showCustomModal('Відкрий через Telegram Web App');
         }
 
-        // scanner.stop(); // Stop the scanner once a QR code is found
+        scanner.stop(); // Stop the scanner once a QR code is found
       },
       {
         /* Options for QrScanner */
