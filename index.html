@@ -48,10 +48,11 @@
       max-height: 300px;
       border: none; /* Removed the main border as requested */
       border-radius: 15px; /* Keep rounded corners for the "hole" effect */
+      background: transparent; /* Explicitly set background to transparent */
       box-sizing: border-box; /* Include padding and border in the element's total width and height */
       position: relative; /* For the focus lines */
       overflow: hidden; /* Hide anything outside the border-radius for the hole */
-      /* This large inset box-shadow creates the semi-transparent dark overlay around the transparent scan area */
+      /* This large box-shadow creates the semi-transparent dark overlay around the transparent scan area */
       box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6); /* Creates the dark mask with a central transparent hole */
     }
 
@@ -133,15 +134,9 @@
       },
       {
         /* Options for QrScanner */
-        // Highlight the scanned code visually
-        highlightScanRegion: true,
-        highlightCodeOutline: true,
-        // Set the desired scan region to match the visual #scan-area
-        // The region is relative to the video feed.
-        // We'll calculate it dynamically to match the centered square.
-        // For simplicity, let the library handle the full frame and rely on the visual guide.
-        // If a more precise scan region is needed, advanced calculation based on video dimensions and #scan-area position would be required.
-        // For now, the visual guide is just a suggestion to the user.
+        // Highlight the scanned code visually - set to false to rely on custom CSS markers
+        highlightScanRegion: false,
+        highlightCodeOutline: false,
       }
     );
 
